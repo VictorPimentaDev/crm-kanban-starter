@@ -12,12 +12,15 @@ authentication and database-enforced isolation between users. Try the interactiv
 
 ![Demonstração real do pipeline, tarefas e venda com comissão](public/assets/demo.gif)
 
-[Captura estática da demonstração](public/assets/demo.png) · **Demo pública:** publicação em preparação.
+[Captura estática da demonstração](public/assets/demo.png) · **[Abrir demo pública](https://crm-kanban-starter.vercel.app/demo)**.
 
 Um ponto de partida para organizar contatos e acompanhar vendas. Cada conta tem
 seu pipeline, suas tarefas e seu histórico. O código foi escrito do zero para
 este starter, inspirado no conceito de um CRM de vendas; não inclui código,
 dados de clientes ou integrações privadas de outro produto.
+
+O GIF usa capturas reais da interface: mover lead, concluir/criar tarefa e registrar
+R$100,05 a 10%, com comissão de R$10,01. A demo pública não depende do Supabase.
 
 ## Experimentar sem backend
 
