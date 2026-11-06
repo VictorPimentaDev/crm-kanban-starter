@@ -349,6 +349,7 @@ p {
   gap: 10px;
 }
 .lead-card {
+  position: relative;
   background: var(--white);
   border: 1px solid #dce0d7;
   box-shadow: 0 2px 3px #192a3205;
