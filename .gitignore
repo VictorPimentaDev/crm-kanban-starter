@@ -1,0 +1,13 @@
+node_modules/
+.next/
+coverage/
+*.tsbuildinfo
+.env*
+!.env.example
+.DS_Store
+supabase/.temp/
+supabase/.branches/
+AGENTS.md
+CLAUDE.md
+.codex/
+.claude/
