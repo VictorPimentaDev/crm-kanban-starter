@@ -1,17 +1,44 @@
 # Linha — CRM Kanban Starter
 
+[![CI](https://github.com/VictorPimentaDev/crm-kanban-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/VictorPimentaDev/crm-kanban-starter/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-ad452f.svg)](LICENSE)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-192a32?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-typed-3178c6?logo=typescript&logoColor=white)
+
 **English summary:** A small Next.js and Supabase CRM with a lead kanban,
 per-lead tasks, sales and commission snapshots. Local-first setup, email/password
-authentication and database-enforced isolation between users.
+authentication and database-enforced isolation between users. Try the interactive
+`/demo` without an account, credentials or a backend; all changes stay in memory.
+
+![Demonstração real do pipeline, tarefas e venda com comissão](public/assets/demo.gif)
+
+[Captura estática da demonstração](public/assets/demo.png) · **Demo pública:** publicação em preparação.
 
 Um ponto de partida para organizar contatos e acompanhar vendas. Cada conta tem
 seu pipeline, suas tarefas e seu histórico. O código foi escrito do zero para
 este starter, inspirado no conceito de um CRM de vendas; não inclui código,
 dados de clientes ou integrações privadas de outro produto.
 
-## Rodar localmente
+## Experimentar sem backend
 
-Você precisa de Node.js 24+, npm, Supabase CLI e um Docker compatível em execução.
+```bash
+npm ci
+npm run dev
+```
+
+Abra [localhost:3000/demo](http://localhost:3000/demo). A demonstração permite mover
+leads, adicionar e concluir tarefas, registrar uma venda e conferir a comissão.
+Tudo é fictício e fica apenas na memória da página. **Restaurar demonstração**
+ou recarregar a página volta aos exemplos iniciais; nenhuma alteração é enviada
+a um servidor, salva em localStorage ou misturada à conta do Supabase.
+
+O board, o formulário de vendas e o cálculo de comissão são os mesmos do CRM.
+A demo só troca a persistência por estado em memória. Sem variáveis do Supabase,
+a página inicial oferece um acesso direto à demonstração e as instruções locais.
+
+## Rodar com seu banco local
+
+Você precisa de Node.js 24, npm, Supabase CLI e um Docker compatível em execução.
 Os comandos abaixo rodam na pasta do repositório:
 
 ```bash
@@ -107,7 +134,8 @@ npm run build
 ```
 
 Os testes Vitest cobrem o parser decimal, os limites e o arredondamento de
-comissões, além de renderização e movimentação do board. O GitHub Actions executa
+comissões, renderização e movimentação do board, além do fluxo da demo: tarefas,
+venda com arredondamento, validação e restauração de dados. O GitHub Actions executa
 lint, typecheck, testes e build com dependências do lockfile.
 
 O teste SQL executa as políticas e constraints contra um banco local real.
@@ -125,13 +153,22 @@ de um projeto hospedado. O CI padrão não inicia a stack Supabase.
 
 ## Estrutura
 
-- `src/app`: páginas do pipeline e das vendas.
+- `src/app`: páginas do pipeline, das vendas e da demonstração `/demo`.
 - `src/components`: autenticação, workspace e board.
 - `src/lib/domain.ts`: regras monetárias e tipos do domínio.
+- `src/lib/demo.ts`: exemplos fictícios e simulação de venda em memória.
 - `supabase/migrations`: schema, políticas, trigger e função de demonstração.
 - `supabase/tests`: verificações de banco com rollback.
 
-Para sair do ambiente local, revise configuração de Auth, confirmação de e-mail,
-URLs de redirecionamento e operação do banco. Não há deploy configurado.
+A demo pode ser publicada na Vercel sem variáveis do Supabase. Para publicar o CRM
+com dados persistentes, revise configuração de Auth, confirmação de e-mail,
+URLs de redirecionamento e operação do banco.
+
+A arte original para compartilhamento está em
+[`public/assets/social-preview.png`](public/assets/social-preview.png)
+(1280 × 640, menos de 1 MB), com fonte SVG ao lado. Ela também aparece nos metadados
+Open Graph da aplicação. Na Vercel, a origem usa `VERCEL_PROJECT_PRODUCTION_URL`.
+A imagem está pronta para configurar a social preview do GitHub quando o
+repositório for tornado público após a revisão.
 
 Licença [MIT](LICENSE).
