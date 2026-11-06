@@ -1,0 +1,3 @@
+-- Deliberately no shared account or password. Sign up in the app, then choose
+-- "Carregar demonstração" to call public.seed_demo() with your authenticated JWT.
+-- The function creates fictitious records atomically, only in an empty account.
