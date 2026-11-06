@@ -18,6 +18,28 @@ function registerSale(amount = "100,05", rate = "10") {
 }
 
 describe("self-contained demo", () => {
+  it("does not register revenue when a lead is moved to Ganho", () => {
+    render(<Demo />);
+    fireEvent.change(screen.getByRole("combobox", { name: "Etapa de Marina Exemplo" }), {
+      target: { value: "ganho" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Vendas" }));
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
+    expect(screen.getByRole("option", { name: /Marina Exemplo/ })).toBeInTheDocument();
+  });
+
+  it("starts a fresh demo after unmounting without retaining the sale", async () => {
+    const { unmount } = render(<Demo />);
+    registerSale();
+    expect(await screen.findByText(/Venda e comissão simuladas/)).toBeVisible();
+    unmount();
+    render(<Demo />);
+    expect(screen.getByRole("combobox", { name: "Etapa de Marina Exemplo" })).toHaveValue("novo");
+    fireEvent.click(screen.getByRole("button", { name: "Vendas" }));
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
+    expect(within(screen.getByRole("table")).queryByText("Marina Exemplo")).not.toBeInTheDocument();
+  });
+
   it("moves a lead with the accessible control and restores all initial state", () => {
     render(<Demo />);
     const select = screen.getByRole("combobox", {
