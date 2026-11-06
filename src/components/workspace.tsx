@@ -5,13 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Board } from "./board";
-import {
-  MAX_CENTS,
-  commissionCents,
-  decimalToInteger,
-  money,
-} from "@/lib/domain";
-import type { Commission, Deal, Lead, Task } from "@/lib/domain";
+import { Brand } from "./brand";
+import { Sales } from "./sales";
+import { MAX_CENTS, decimalToInteger, money } from "@/lib/domain";
+import type { Commission, CrmData, Deal, Lead, Task } from "@/lib/domain";
 import { supabase } from "@/lib/supabase";
 
 type View = "pipeline" | "sales";
@@ -52,6 +49,14 @@ export function Workspace({ view }: { view: View }) {
           <br />
           começa aqui.
         </h1>
+        <p>Explore o pipeline, organize tarefas e simule sua próxima venda.</p>
+        <Link href="/demo" className="primary demo-link">
+          Experimentar demonstração →
+        </Link>
+        <p className="small">
+          Dados fictícios. Sem cadastro. As alterações duram apenas esta sessão.
+        </p>
+        <h2>Quer usar com seus dados?</h2>
         <p>Configure o Supabase local para abrir seu espaço.</p>
         <ol>
           <li>
@@ -79,15 +84,6 @@ export function Workspace({ view }: { view: View }) {
     );
   if (!user) return <Auth initialError={error} />;
   return <Dashboard key={user.id} user={user} view={view} />;
-}
-
-function Brand() {
-  return (
-    <div className="brand">
-      <span aria-hidden="true">╱</span> linha
-      <span className="brand-caption">CRM / STARTER</span>
-    </div>
-  );
 }
 
 function Auth({ initialError }: { initialError: string }) {
@@ -185,12 +181,6 @@ function Auth({ initialError }: { initialError: string }) {
   );
 }
 
-type Data = {
-  leads: Lead[];
-  tasks: Task[];
-  deals: Deal[];
-  commissions: Commission[];
-};
 async function readAll(table: "leads" | "tasks" | "deals" | "commissions") {
   const rows = [];
   for (let from = 0; ; from += 1000) {
@@ -206,7 +196,7 @@ async function readAll(table: "leads" | "tasks" | "deals" | "commissions") {
 }
 
 function Dashboard({ user, view }: { user: User; view: View }) {
-  const [data, setData] = useState<Data>({
+  const [data, setData] = useState<CrmData>({
     leads: [],
     tasks: [],
     deals: [],
@@ -429,17 +419,15 @@ function Dashboard({ user, view }: { user: User; view: View }) {
                   const form = event.currentTarget;
                   const values = new FormData(form);
                   const saved = await run(async () => {
-                    const { error } = await supabase!
-                      .from("leads")
-                      .insert({
-                        name: field(values, "name"),
-                        company: field(values, "company"),
-                        email: field(values, "email"),
-                        value_cents: decimalToInteger(
-                          field(values, "value"),
-                          MAX_CENTS,
-                        ),
-                      });
+                    const { error } = await supabase!.from("leads").insert({
+                      name: field(values, "name"),
+                      company: field(values, "company"),
+                      email: field(values, "email"),
+                      value_cents: decimalToInteger(
+                        field(values, "value"),
+                        MAX_CENTS,
+                      ),
+                    });
                     checked(error);
                   }, "Lead adicionado.");
                   if (saved) form.reset();
@@ -544,13 +532,11 @@ function Dashboard({ user, view }: { user: User; view: View }) {
                     const form = event.currentTarget;
                     const values = new FormData(form);
                     const saved = await run(async () => {
-                      const { error } = await supabase!
-                        .from("tasks")
-                        .insert({
-                          lead_id: activeLead.id,
-                          title: field(values, "title"),
-                          due_date: field(values, "due_date") || null,
-                        });
+                      const { error } = await supabase!.from("tasks").insert({
+                        lead_id: activeLead.id,
+                        title: field(values, "title"),
+                        due_date: field(values, "due_date") || null,
+                      });
                       checked(error);
                     }, "Tarefa adicionada.");
                     if (saved) form.reset();
@@ -572,171 +558,21 @@ function Dashboard({ user, view }: { user: User; view: View }) {
             )}
           </>
         ) : (
-          <Sales data={data} busy={busy} run={run} />
+          <Sales
+            data={data}
+            busy={busy}
+            onCreate={(sale) =>
+              run(async () => {
+                const { error } = await supabase!.from("deals").insert(sale);
+                checked(error);
+              }, "Venda e comissão registradas.")
+            }
+          />
         )}
         <footer>
           Linha / CRM starter<span>Um próximo passo de cada vez.</span>
         </footer>
       </main>
     </div>
-  );
-}
-
-function Sales({
-  data,
-  busy,
-  run,
-}: {
-  data: Data;
-  busy: boolean;
-  run: (operation: () => Promise<void>, success: string) => Promise<boolean>;
-}) {
-  const [amount, setAmount] = useState("");
-  const [rate, setRate] = useState("5");
-  const available = data.leads.filter(
-    (lead) => !data.deals.some((deal) => deal.lead_id === lead.id),
-  );
-  let preview = "—";
-  try {
-    preview = money(
-      commissionCents(
-        decimalToInteger(amount, MAX_CENTS),
-        decimalToInteger(rate, 10000),
-      ),
-    );
-  } catch {
-    /* Incomplete form input has no preview. */
-  }
-  return (
-    <>
-      <section className="sales-create">
-        <div>
-          <p className="eyebrow">Registrar conquista</p>
-          <h2>Negócio fechado?</h2>
-          <p>
-            A comissão fica registrada com o percentual desta venda. Uma venda
-            por lead.
-          </p>
-          <p className="small">
-            Mover um card para Ganho não cria uma venda automaticamente.
-            Registrar a venda move o card para Ganho.
-          </p>
-        </div>
-        <form
-          className="sales-form"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            const form = event.currentTarget;
-            const values = new FormData(form);
-            const saved = await run(async () => {
-              const amount_cents = decimalToInteger(amount, MAX_CENTS);
-              if (!amount_cents)
-                throw new Error("O valor da venda precisa ser maior que zero.");
-              const { error } = await supabase!
-                .from("deals")
-                .insert({
-                  lead_id: field(values, "lead_id"),
-                  amount_cents,
-                  rate_bps: decimalToInteger(rate, 10000),
-                });
-              checked(error);
-            }, "Venda e comissão registradas.");
-            if (saved) {
-              form.reset();
-              setAmount("");
-            }
-          }}
-        >
-          <label>
-            Lead
-            <select name="lead_id" required defaultValue="">
-              <option value="" disabled>
-                Selecione um lead
-              </option>
-              {available.map((lead) => (
-                <option key={lead.id} value={lead.id}>
-                  {lead.name} · {lead.company}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="form-pair">
-            <label>
-              Venda (R$)
-              <input
-                inputMode="decimal"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Comissão (%)
-              <input
-                inputMode="decimal"
-                value={rate}
-                onChange={(event) => setRate(event.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <p className="commission-preview">
-            Comissão prevista<strong>{preview}</strong>
-          </p>
-          <button className="primary" disabled={busy || !available.length}>
-            Registrar venda →
-          </button>
-          <p className="small">
-            Registro definitivo neste starter. Confira os valores antes de
-            salvar.
-          </p>
-        </form>
-      </section>
-      <section className="sales-history">
-        <h2>
-          Vendas registradas{" "}
-          <span className="small">({data.deals.length})</span>
-        </h2>
-        {!data.deals.length ? (
-          <p className="empty-state">
-            Seu histórico começa com a primeira conquista.
-          </p>
-        ) : (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Lead</th>
-                  <th>Data</th>
-                  <th>Venda</th>
-                  <th>Percentual</th>
-                  <th>Comissão</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.deals.map((deal) => (
-                  <tr key={deal.id}>
-                    <td>
-                      {data.leads.find((lead) => lead.id === deal.lead_id)
-                        ?.name ?? "Lead"}
-                    </td>
-                    <td>{deal.closed_on.split("-").reverse().join("/")}</td>
-                    <td>{money(deal.amount_cents)}</td>
-                    <td>{(deal.rate_bps / 100).toLocaleString("pt-BR")}%</td>
-                    <td>
-                      {money(
-                        data.commissions.find(
-                          (item) => item.deal_id === deal.id,
-                        )?.amount_cents ?? 0,
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-    </>
   );
 }

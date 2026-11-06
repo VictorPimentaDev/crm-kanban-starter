@@ -61,3 +61,11 @@ export const money = (cents: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
     cents / 100,
   );
+
+export type CrmData = {
+  leads: Lead[];
+  tasks: Task[];
+  deals: Deal[];
+  commissions: Commission[];
+};
+export type SaleInput = Pick<Deal, "lead_id" | "amount_cents" | "rate_bps">;

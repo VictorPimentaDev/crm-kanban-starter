@@ -729,3 +729,50 @@ code {
     transition: none !important;
   }
 }
+
+.demo-link {
+  display: inline-block;
+  text-decoration: none;
+  padding: 14px 20px;
+  border-radius: 4px;
+  margin: 8px 0 14px;
+}
+.setup > h2 {
+  margin-top: 42px;
+}
+.topbar nav button {
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  color: var(--muted);
+  border-radius: 0;
+}
+.topbar nav button[aria-current] {
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+}
+.demo-banner {
+  padding: 12px 3.5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #e9eddf;
+  border-bottom: 1px solid #d0d6c8;
+}
+.demo-banner p {
+  margin: 0;
+  font-size: 12px;
+}
+.demo-banner button {
+  white-space: nowrap;
+  font-size: 11px;
+}
+@media (max-width: 750px) {
+  .demo-banner {
+    align-items: flex-start;
+    padding: 14px 5%;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
