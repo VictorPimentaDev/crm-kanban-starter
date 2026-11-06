@@ -5,7 +5,7 @@ Verificado em **06/11/2026**, a partir do checkpoint `618ba3e`, na branch
 nenhuma configuração de visibilidade foi alterada por este trabalho.
 
 **Correção pronta para revisão.** Os fluxos locais passaram. A demo pública
-continua em <https://crm-kanban-starter.vercel.app/demo>, sem novo deploy, e ainda
+continua em <https://crm-kanban-starter.vercel.app/demo>, sem promoção de produção, e ainda
 apresenta o overflow mobile descrito abaixo. Os **8 alertas moderados de lint
 continuam abertos**, sem atualização estável compatível disponível nesta data.
 
@@ -161,7 +161,16 @@ imediatamente antes do push. Arquivos de agente permanecem fora do índice Git.
 
 ## Limitações e pontos para conferir
 
-- A URL publicada ainda tem o defeito mobile; esta branch não foi implantada.
+- A URL principal ainda tem o defeito mobile. Após o primeiro push, a integração
+  Git existente criou automaticamente um preview de `28df50b`, registrado pelo bot
+  Vercel no PR. Não houve comando de deploy nem promoção de produção. Isso foi
+  um efeito indesejado do push autorizado e foi informado ao Victor.
+  `vercel.json` agora desativa autodeploy **somente** da branch
+  `portfolio/demo-regression-f8306abd`, conforme a
+  [configuração oficial](https://vercel.com/docs/project-configuration/git-configuration).
+  Main e demais branches mantêm seu comportamento; o preview já criado não foi
+  promovido ou removido. Esse arquivo é a única mudança além da correção/UI/QA,
+  necessária para impedir outro preview ao enviar a nota corrigida.
 - Mobile significa viewport Chromium 390 × 844, sem aparelho nativo, Safari,
   teclado virtual ou gesto de arraste por toque. O seletor alternativo foi usado.
 - O preenchimento de data nativa de agent-browser 0.31.1 deixou o campo vazio.
@@ -172,6 +181,6 @@ imediatamente antes do push. Arquivos de agente permanecem fora do índice Git.
   esta worktree no perfil isolado resolveu; não foi falha do schema.
 - O conector GitHub não tinha acesso ao repo; foi usado o `gh` autenticado.
 - As credenciais locais não foram versionadas. Não houve acesso a produção,
-  integração WhatsApp, envio de e-mail externo, migração remota ou novo deploy.
+  integração WhatsApp, envio de e-mail externo, migração remota ou deploy manual.
 - Revisar as capturas, a rolagem interna do board/tabela e os oito alertas dev
   antes de qualquer publicação futura. O link do demo foi preservado.
